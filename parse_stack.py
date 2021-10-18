@@ -3,11 +3,12 @@ import re
 import os
 
 sohead = re.compile('(.+\.so):')
-funchead = re.compile('([0-9a-f]{8}) <(.+)>:')
+funchead = re.compile('([0-9a-f]+) <(.+)>:')
 funcline = re.compile('^[ ]+([0-9a-f]+):.+')
 
 def parsestack( lines, libname ):
-    crashline = re.compile('.+pc.([0-9a-f]{8}).+%s' % libname )
+    #print "libname: "+ libname
+    crashline = re.compile('.+pc.([0-9a-f]+).+%s' % libname )
     ret = []
     for l in lines:
         m = crashline.match(l)
