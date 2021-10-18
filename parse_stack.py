@@ -46,8 +46,9 @@ def parseasm( lines ):
 #            print 'XXX',l
             restartcode = False;
             ret.append(current)
-            current = [ current[0], current[1], current[3], current[3], [] ] 
         if current != None:
+            current = [ current[0], current[1], current[3], current[3], [] ] 
+
             current[4].append(l);
 
     return so, ret
