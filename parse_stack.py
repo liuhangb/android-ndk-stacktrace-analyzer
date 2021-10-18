@@ -11,9 +11,13 @@ def parsestack( lines, libname ):
     crashline = re.compile('.+pc.([0-9a-f]+).+%s' % libname )
     ret = []
     for l in lines:
+        #l = "#11 pc 11110000000057f0  /data/app/xcrash.sample-iMHn62XckJrnGHOicPTJFQ==/lib/arm64/libxcrash.so (xc_test_call_4+12)"
+        #print "stackLine: " + l
+
         m = crashline.match(l)
         if m:
             addr =  m.groups()[0]
+            #print "addr: "+ str(int(addr,16))
             ret.append(int(addr,16))
     return ret
 
@@ -22,17 +26,21 @@ def parseasm( lines ):
     current = None
     restartcode = False;
     for l in lines:
+        #print "test: "+ l
+
         m = funchead.match(l)
         if m:
             if current:
                 ret.append(current)
             startaddr, funcname =  m.groups()
+            #print "test1 startaddr: " + startaddr +",funcname: " +funcname
             current = [ funcname, int(startaddr,16), int(startaddr,16), int(startaddr,16), [] ]
             continue
         m = funcline.match(l)
         if m:
             restartcode = True;
             addr =  m.groups()[0]
+            #print "test2 addr: " + addr
             if current != None:
                 current[3] = int(addr,16)
             continue
@@ -40,12 +48,15 @@ def parseasm( lines ):
         if m:
             so =  m.groups()[0]
             so = os.path.split(so)[1]
+            #print "test3 so: " + so
             continue
 
         #Assume anything else is a code line
         if restartcode:
 #            print 'XXX',l
             restartcode = False;
+            #print current
+            #print "test4"
             ret.append(current)
         if current != None:
             current = [ current[0], current[1], current[3], current[3], [] ] 
@@ -60,6 +71,7 @@ if __name__=="__main__":
     libname, asm = parseasm( file(asm).read().split('\n') )
     stack = parsestack( file(stack).read().split('\n'), libname )
     for addr in stack:
+        #print "addr: " + str(addr)
         for func, funcstart, segstart, segend, code in asm:
             if addr >= segstart and addr <= segend:
                 print "0x%08x:%32s + 0x%04x %s" % ( addr, func, addr-funcstart, "".join(["\n"+x for x in code]))
