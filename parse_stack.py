@@ -7,7 +7,8 @@ funchead = re.compile('([0-9a-f]+) <(.+)>:')
 funcline = re.compile('^[ ]+([0-9a-f]+):.+')
 
 def parsestack( lines, libname ):
-    #print "libname: "+ libname
+    #print "parsestack start===================="
+    #print "libname: " + libname
     crashline = re.compile('.+pc.([0-9a-f]+).+%s' % libname )
     ret = []
     for l in lines:
@@ -19,9 +20,13 @@ def parsestack( lines, libname ):
             addr =  m.groups()[0]
             #print "addr: "+ str(int(addr,16))
             ret.append(int(addr,16))
+    #print ret
+    #print "ret======="
+    #print "parsestack end===================="
     return ret
 
 def parseasm( lines ):
+    #print "parseasm start===================="
     ret = []
     current = None
     restartcode = False;
@@ -33,14 +38,14 @@ def parseasm( lines ):
             if current:
                 ret.append(current)
             startaddr, funcname =  m.groups()
-            #print "test1 startaddr: " + startaddr +",funcname: " +funcname
+            #print "funchead startaddr: " + startaddr +",funcname: " +funcname
             current = [ funcname, int(startaddr,16), int(startaddr,16), int(startaddr,16), [] ]
             continue
         m = funcline.match(l)
         if m:
             restartcode = True;
             addr =  m.groups()[0]
-            #print "test2 addr: " + addr
+            #print "funcline addr: " + str(int(addr, 16))
             if current != None:
                 current[3] = int(addr,16)
             continue
@@ -48,7 +53,7 @@ def parseasm( lines ):
         if m:
             so =  m.groups()[0]
             so = os.path.split(so)[1]
-            #print "test3 so: " + so
+            #print "sohead so: " + so
             continue
 
         #Assume anything else is a code line
@@ -56,12 +61,17 @@ def parseasm( lines ):
 #            print 'XXX',l
             restartcode = False;
             #print current
-            #print "test4"
+            #print "restartcode"
             ret.append(current)
+
         if current != None:
             current = [ current[0], current[1], current[3], current[3], [] ] 
 
             current[4].append(l);
+            #print current
+            #print "code"
+
+    #print "parseasm end===================="
 
     return so, ret
 
