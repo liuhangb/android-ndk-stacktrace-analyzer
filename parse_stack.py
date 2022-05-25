@@ -35,6 +35,7 @@ def parseasm( lines ):
 
         m = funchead.match(l)
         if m:
+            # 添加上个方法的最后一条记录
             if current:
                 ret.append(current)
             startaddr, funcname =  m.groups()
