@@ -63,7 +63,7 @@ def parseasm( lines ):
             #print current
             #print "restartcode"
             ret.append(current)
-
+        # 先添加代码（代码只保留最近一行）, 再更新地址
         if current != None:
             current = [ current[0], current[1], current[3], current[3], [] ] 
 
@@ -79,10 +79,12 @@ if __name__=="__main__":
     asm, stack = sys.argv[1],sys.argv[2]
 
     libname, asm = parseasm( file(asm).read().split('\n') )
+    # print "asm:" + str(asm)
     stack = parsestack( file(stack).read().split('\n'), libname )
     for addr in stack:
         #print "addr: " + str(addr)
         for func, funcstart, segstart, segend, code in asm:
+            # 可能会匹配到两条记录
             if addr >= segstart and addr <= segend:
                 print "0x%08x:%32s + 0x%04x %s" % ( addr, func, addr-funcstart, "".join(["\n"+x for x in code]))
 
